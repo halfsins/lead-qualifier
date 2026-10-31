@@ -1,5 +1,6 @@
 import { extractLead } from "@/lib/extract";
 import { supabase } from "@/lib/db";
+import { notifySlack } from "@/lib/notify";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -42,6 +43,22 @@ export async function POST(request: Request) {
   }
 
   console.log("Qualified lead. id:", row.id, "score:", lead.score);
+
+  if (lead.score >= 7) {
+    await notifySlack(lead);
+
+    const { error: notifyError } = await supabase
+    .from("leads")
+    .update({
+      notified_at: new Date().toISOString()
+    })
+    .eq("id", row.id);
+  
+  if (notifyError) {
+    console.error("Pinged Slack, but failed to record notified_at:", notifyError);
+  }
+  }
+
 
   return Response.json({ ok: true });
 }

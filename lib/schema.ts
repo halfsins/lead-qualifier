@@ -17,6 +17,8 @@ export const leadSchema = z.object({
 
   budgetUsd: z
     .number()
+    .int()
+    .nonnegative()
     .nullable()
     .describe("Budget in whole US dollars. '5k' means 5000. null if no budget is mentioned."),
 
@@ -68,7 +70,7 @@ export function scoreLead(l: LeadFeatures): { score: number; intent: Intent } {
 
   const hasBudget = l.budgetUsd !== null && l.budgetIsFirm;
   const hasTimeline = l.timeline !== null;
-  const strongSignal = l.urgent || l.requestedNextStep;
+  const strongSignal = l.requestedNextStep || l.urgent;
 
   if (l.needSpecificity === "unclear") {
     return { score: hasBudget || hasTimeline ? 4 : 3, intent: "cold" };
@@ -78,8 +80,8 @@ export function scoreLead(l: LeadFeatures): { score: number; intent: Intent } {
     return { score: hasBudget && hasTimeline ? 6 : 5, intent: "warm" };
   }
 
-  if (hasBudget && hasTimeline) return { score: strongSignal ? 10 : 9, intent: "hot" };
-  if (hasBudget || hasTimeline) return { score: strongSignal ? 8 : 7, intent: "warm" };
+  if (hasBudget && hasTimeline) return { score: strongSignal ? 10 : 9, intent: "hot" }; 
+  if (hasBudget || hasTimeline) return { score: strongSignal ? 8 : 7, intent: "warm" }; 
 
   return { score: 6, intent: "warm" };
 }

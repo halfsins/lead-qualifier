@@ -11,6 +11,7 @@ export async function extractLead(message: string) {
     system: extractionRules,
     prompt: `Extract the facts from this inbound sales lead:\n\n${message}`,
     temperature: 0,
+    abortSignal: AbortSignal.timeout(15_000),
   });
 
   const { score, intent } = scoreLead(object);

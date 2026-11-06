@@ -2,11 +2,15 @@ import { extractLead } from "@/lib/extract";
 import { supabase } from "@/lib/db";
 import { notifySlack } from "@/lib/notify";
 import { after } from "next/server";
-import { fail } from "assert";
 import { createHash } from "crypto";
 
 export async function POST(request: Request) {
+  
   const body = await request.json();
+  if (typeof body.message !== "string" || body.message.trim() === "" ) {
+    return Response.json({ ok: false, error: "message is required" }, { status: 400 });
+  }
+
   const dedupeKey = createHash("sha256")
   .update(`${(body.email ?? "").trim().toLowerCase()}|${body.message.trim()}`)
   .digest("hex");

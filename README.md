@@ -18,7 +18,7 @@ A lead arrives as a messy, unstructured message. The pipeline:
 4. **Persists** everything to Postgres
 5. **Notifies** Slack when a lead scores high enough to be worth calling
 
-Everything lands in a dashboard sorted by score, with status colour-coded so anything needing attention is visible at a glance.
+Everything lands in a dashboard sorted by score, with status color-coded so anything needing attention is visible at a glance.
 
 ## Reliability
 

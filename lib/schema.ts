@@ -1,8 +1,15 @@
-// lib/schema.ts
 import { z } from "zod";
 
+const offeredServices = `AI chatbots, AI assistants, and workflow automation`;
+const excludedServices = `design, branding, SEO, copywriting, photography, or general web development`;
+
+// What this business sells. The one place to change per client.
+export const businessProfile = `This business builds ${offeredServices} for small businesses. It does not offer ${excludedServices}.`;
+
 // System prompt: extraction only. Scoring happens in scoreLead() below.
-export const extractionRules = `Extract facts from the lead message. Use only evidence in the message; never assume missing details. Do not judge how good the lead is.`;
+export const extractionRules = `${businessProfile}
+
+Extract facts from the lead message. Use only evidence in the message; never assume missing details. Do not judge how good the lead is.`;
 
 export const leadSchema = z.object({
   name: z
@@ -41,7 +48,11 @@ export const leadSchema = z.object({
 
   isPotentialCustomer: z
     .boolean()
-    .describe("false if the sender is not trying to buy AI services: sales pitches, vendor solicitations, job applications, spam. true otherwise."),
+    .describe("false if the sender is not trying to buy anything: sales pitches, vendor solicitations, job applications, spam. true if they are trying to buy or hire for a service, even one this business does not offer."),
+
+  wantsOurServices: z
+    .boolean()
+    .describe("true if the sender wants something this business offers, as described in the system prompt. false if they want a service it does not offer, such as design, branding, SEO, copywriting, photography, or general web development. true if they are not asking for any specific service."),
 
   needQuote: z
     .string()
@@ -67,6 +78,7 @@ export type Intent = "hot" | "warm" | "cold" | "spam";
 
 export function scoreLead(l: LeadFeatures): { score: number; intent: Intent } {
   if (!l.isPotentialCustomer) return { score: 1, intent: "spam" };
+  if (!l.wantsOurServices) return { score: 2, intent: "cold" };
 
   const hasBudget = l.budgetUsd !== null && l.budgetIsFirm;
   const hasTimeline = l.timeline !== null;

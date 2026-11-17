@@ -12,7 +12,7 @@ export async function notifySlack(lead: SlackLead) {
   const url = process.env.SLACK_WEBHOOK_URL;
   if (!url) throw new Error("Missing SLACK_WEBHOOK_URL in .env.local");
 
-  const budget = lead.budgetUsd !== null ? `$${lead.budgetUsd}` : "not stated";
+  const budget = lead.budgetUsd !== null ? `$${lead.budgetUsd.toLocaleString()}` : "not stated";
 
   const text = [
     `*New lead, score ${lead.score}/10*`,
